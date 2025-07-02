@@ -1,0 +1,5 @@
+echo "vendor/
+composer.lock
+*.log
+.phpunit.result.cache
+" > .gitignore
