@@ -9,6 +9,7 @@
  */
 namespace PHPUnit\Runner\Baseline;
 
+use function assert;
 use function dirname;
 use function file_put_contents;
 use XMLWriter;
@@ -18,10 +19,10 @@ use XMLWriter;
  *
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
-final readonly class Writer
+final class Writer
 {
     /**
-     * @param non-empty-string $baselineFile
+     * @psalm-param non-empty-string $baselineFile
      */
     public function write(string $baselineFile, Baseline $baseline): void
     {
@@ -37,6 +38,8 @@ final readonly class Writer
         $writer->writeAttribute('version', (string) Baseline::VERSION);
 
         foreach ($baseline->groupedByFileAndLine() as $file => $lines) {
+            assert(!empty($file));
+
             $writer->startElement('file');
             $writer->writeAttribute('path', $pathCalculator->calculate($file));
 
@@ -47,7 +50,7 @@ final readonly class Writer
 
                 foreach ($issues as $issue) {
                     $writer->startElement('issue');
-                    $writer->writeCdata($issue->description());
+                    $writer->writeCData($issue->description());
                     $writer->endElement();
                 }
 

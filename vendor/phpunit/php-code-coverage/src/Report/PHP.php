@@ -9,14 +9,13 @@
  */
 namespace SebastianBergmann\CodeCoverage\Report;
 
-use const PHP_EOL;
 use function dirname;
 use function file_put_contents;
 use function serialize;
 use function str_contains;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
+use SebastianBergmann\CodeCoverage\Driver\WriteOperationFailedException;
 use SebastianBergmann\CodeCoverage\Util\Filesystem;
-use SebastianBergmann\CodeCoverage\WriteOperationFailedException;
 
 final class PHP
 {

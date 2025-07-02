@@ -33,17 +33,24 @@ use PHPUnit\Util\Filesystem;
  */
 final class DefaultResultCache implements ResultCache
 {
-    private const int VERSION                          = 1;
-    private const string DEFAULT_RESULT_CACHE_FILENAME = '.phpunit.result.cache';
+    /**
+     * @var int
+     */
+    private const VERSION = 1;
+
+    /**
+     * @var string
+     */
+    private const DEFAULT_RESULT_CACHE_FILENAME = '.phpunit.result.cache';
     private readonly string $cacheFilename;
 
     /**
-     * @var array<string, TestStatus>
+     * @psalm-var array<string, TestStatus>
      */
     private array $defects = [];
 
     /**
-     * @var array<string, float>
+     * @psalm-var array<string, float>
      */
     private array $times = [];
 

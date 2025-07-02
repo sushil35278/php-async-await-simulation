@@ -14,7 +14,6 @@ use function array_diff_key;
 use function array_flip;
 use function array_intersect;
 use function array_intersect_key;
-use function array_map;
 use function count;
 use function explode;
 use function file_get_contents;
@@ -26,15 +25,14 @@ use function str_ends_with;
 use function str_starts_with;
 use function trim;
 use SebastianBergmann\CodeCoverage\Driver\Driver;
-use SebastianBergmann\CodeCoverage\Driver\XdebugDriver;
 use SebastianBergmann\CodeCoverage\StaticAnalysis\FileAnalyser;
 
 /**
  * @internal This class is not covered by the backward compatibility promise for phpunit/php-code-coverage
  *
- * @phpstan-import-type XdebugFunctionsCoverageType from XdebugDriver
- * @phpstan-import-type XdebugCodeCoverageWithoutPathCoverageType from XdebugDriver
- * @phpstan-import-type XdebugCodeCoverageWithPathCoverageType from XdebugDriver
+ * @psalm-import-type XdebugFunctionsCoverageType from \SebastianBergmann\CodeCoverage\Driver\XdebugDriver
+ * @psalm-import-type XdebugCodeCoverageWithoutPathCoverageType from \SebastianBergmann\CodeCoverage\Driver\XdebugDriver
+ * @psalm-import-type XdebugCodeCoverageWithPathCoverageType from \SebastianBergmann\CodeCoverage\Driver\XdebugDriver
  */
 final class RawCodeCoverageData
 {
@@ -44,17 +42,17 @@ final class RawCodeCoverageData
     private static array $emptyLineCache = [];
 
     /**
-     * @var XdebugCodeCoverageWithoutPathCoverageType
+     * @psalm-var XdebugCodeCoverageWithoutPathCoverageType
      */
     private array $lineCoverage;
 
     /**
-     * @var array<string, XdebugFunctionsCoverageType>
+     * @psalm-var array<string, XdebugFunctionsCoverageType>
      */
     private array $functionCoverage;
 
     /**
-     * @param XdebugCodeCoverageWithoutPathCoverageType $rawCoverage
+     * @psalm-param XdebugCodeCoverageWithoutPathCoverageType $rawCoverage
      */
     public static function fromXdebugWithoutPathCoverage(array $rawCoverage): self
     {
@@ -62,7 +60,7 @@ final class RawCodeCoverageData
     }
 
     /**
-     * @param XdebugCodeCoverageWithPathCoverageType $rawCoverage
+     * @psalm-param XdebugCodeCoverageWithPathCoverageType $rawCoverage
      */
     public static function fromXdebugWithPathCoverage(array $rawCoverage): self
     {
@@ -88,17 +86,18 @@ final class RawCodeCoverageData
 
     public static function fromUncoveredFile(string $filename, FileAnalyser $analyser): self
     {
-        $lineCoverage = array_map(
-            static fn (): int => Driver::LINE_NOT_EXECUTED,
-            $analyser->analyse($filename)->executableLines(),
-        );
+        $lineCoverage = [];
+
+        foreach ($analyser->executableLinesIn($filename) as $line => $branch) {
+            $lineCoverage[$line] = Driver::LINE_NOT_EXECUTED;
+        }
 
         return new self([$filename => $lineCoverage], []);
     }
 
     /**
-     * @param XdebugCodeCoverageWithoutPathCoverageType  $lineCoverage
-     * @param array<string, XdebugFunctionsCoverageType> $functionCoverage
+     * @psalm-param XdebugCodeCoverageWithoutPathCoverageType $lineCoverage
+     * @psalm-param array<string, XdebugFunctionsCoverageType> $functionCoverage
      */
     private function __construct(array $lineCoverage, array $functionCoverage)
     {
@@ -114,7 +113,7 @@ final class RawCodeCoverageData
     }
 
     /**
-     * @return XdebugCodeCoverageWithoutPathCoverageType
+     * @psalm-return XdebugCodeCoverageWithoutPathCoverageType
      */
     public function lineCoverage(): array
     {
@@ -122,7 +121,7 @@ final class RawCodeCoverageData
     }
 
     /**
-     * @return array<string, XdebugFunctionsCoverageType>
+     * @psalm-return array<string, XdebugFunctionsCoverageType>
      */
     public function functionCoverage(): array
     {
@@ -214,7 +213,7 @@ final class RawCodeCoverageData
      */
     public function removeCoverageDataForLines(string $filename, array $lines): void
     {
-        if ($lines === []) {
+        if (empty($lines)) {
             return;
         }
 
@@ -261,9 +260,6 @@ final class RawCodeCoverageData
         }
     }
 
-    /**
-     * @return array<int>
-     */
     private function getEmptyLinesForFile(string $filename): array
     {
         if (!isset(self::$emptyLineCache[$filename])) {
